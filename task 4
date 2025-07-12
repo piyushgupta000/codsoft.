@@ -1,0 +1,50 @@
+# Simple Content-Based Recommendation System
+
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
+
+# Sample data: Products and their descriptions
+data = {
+    'item': [
+        'Harry Potter and the Sorcerer\'s Stone',
+        'The Hobbit',
+        'The Da Vinci Code',
+        'The Alchemist',
+        'Twilight'
+    ],
+    'description': [
+        'wizard magic fantasy adventure',
+        'dwarves dragon adventure magic',
+        'mystery thriller conspiracy art',
+        'philosophy self-discovery dream',
+        'romance vampire fantasy school'
+    ]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+# Convert descriptions to vectors
+vectorizer = CountVectorizer()
+count_matrix = vectorizer.fit_transform(df['description'])
+
+# Compute similarity between items
+cosine_sim = cosine_similarity(count_matrix)
+
+# Function to recommend similar items
+def recommend(item_name):
+    if item_name not in df['item'].values:
+        return f"'{item_name}' not found in the dataset."
+
+    idx = df[df['item'] == item_name].index[0]
+    similarity_scores = list(enumerate(cosine_sim[idx]))
+    similarity_scores = sorted(similarity_scores, key=lambda x: x[1], reverse=True)
+    recommended_items = [df['item'][i] for i, score in similarity_scores[1:4]]
+
+    return recommended_items
+
+# Example usage
+user_input = 'The Hobbit'
+print(f"Because you liked '{user_input}', you may also like:")
+print(recommend(user_input))
