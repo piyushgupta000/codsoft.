@@ -1,0 +1,48 @@
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer
+import pandas as pd
+
+# Sample data: items with features (content-based)
+data = {
+    'title': [
+        'The Matrix',
+        'Inception',
+        'Interstellar',
+        'The Notebook',
+        'Titanic'
+    ],
+    'features': [
+        'sci-fi action futuristic',
+        'sci-fi thriller dream',
+        'space sci-fi drama',
+        'romance drama love',
+        'romance drama ship'
+    ]
+}
+
+# Create DataFrame
+items_df = pd.DataFrame(data)
+
+# Vectorize the features
+vectorizer = CountVectorizer()
+feature_matrix = vectorizer.fit_transform(items_df['features'])
+
+# Compute cosine similarity
+cosine_sim = cosine_similarity(feature_matrix)
+
+# Recommendation function
+def recommend(title, df, similarity_matrix):
+    if title not in df['title'].values:
+        return f"'{title}' not found in the dataset."
+
+    idx = df[df['title'] == title].index[0]
+    sim_scores = list(enumerate(similarity_matrix[idx]))
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:4]
+    recommendations = [df['title'][i] for i, _ in sim_scores]
+
+    return recommendations
+
+# Example usage
+user_input = 'Inception'
+print(f"Recommendations for '{user_input}':")
+print(recommend(user_input, items_df, cosine_sim))
